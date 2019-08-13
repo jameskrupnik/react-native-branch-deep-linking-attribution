@@ -45,7 +45,7 @@ class Branch {
         if (result) {
           /*** Cached value is returned, so set it as cached. ***/
           if('params' in result && !!result['params']) {
-            result['params']['+rn_cached_initial_event'] = true
+            result['params']['cached_initial_event'] = true
           }
 
           listener(result)
@@ -107,7 +107,7 @@ class Branch {
 
   /*** RNBranch singleton methods ***/
   setDebug = () => { throw 'setDebug() is not supported in the RN SDK. For other solutions, please see https://rnbranch.app.link/setDebug' }
-  getLatestReferringParams = (synchronous = false) => RNBranch.getLatestReferringParams(synchronous)
+  getLatestReferringParams = RNBranch.getLatestReferringParams
   getFirstReferringParams = RNBranch.getFirstReferringParams
   setIdentity = (identity) => RNBranch.setIdentity(identity)
   logout = RNBranch.logout

@@ -15,7 +15,6 @@ NSString * const RNBranchLinkOpenedNotificationUriKey = @"uri";
 NSString * const RNBranchLinkOpenedNotificationBranchUniversalObjectKey = @"branch_universal_object";
 NSString * const RNBranchLinkOpenedNotificationLinkPropertiesKey = @"link_properties";
 
-
 static NSDictionary *initSessionWithLaunchOptionsResult;
 static BOOL useTestInstance = NO;
 static NSDictionary *savedLaunchOptions;
@@ -28,8 +27,6 @@ static NSString * const IdentFieldName = @"ident";
 // These are only really exposed to the JS layer, so keep them internal for now.
 static NSString * const RNBranchErrorDomain = @"RNBranchErrorDomain";
 static NSInteger const RNBranchUniversalObjectNotFoundError = 1;
-
-static NSString * const REQUIRED_BRANCH_SDK = @"0.27.1";
 
 #pragma mark - Private RNBranch declarations
 
@@ -78,10 +75,6 @@ RCT_EXPORT_MODULE();
 + (void)setupBranchInstance:(Branch *)instance
 {
     RCTLogInfo(@"Initializing Branch SDK v. %@", BNC_SDK_VERSION);
-    if (![BNC_SDK_VERSION isEqualToString:REQUIRED_BRANCH_SDK]) {
-        RCTLogError(@"Please use v. %@ of Branch. In your Podfile: pod 'Branch', '%@'. Then pod install.", REQUIRED_BRANCH_SDK, REQUIRED_BRANCH_SDK);
-    }
-
     RNBranchConfig *config = RNBranchConfig.instance;
     if (config.debugMode) {
         [instance setDebug];
@@ -160,7 +153,7 @@ RCT_EXPORT_MODULE();
 + (void)useTestInstance {
     useTestInstance = YES;
 }
-
+    
 + (void)deferInitializationForJSLoad
 {
     deferInitializationForJSLoad = YES;
@@ -183,15 +176,15 @@ RCT_EXPORT_MODULE();
         if (error) result[RNBranchLinkOpenedNotificationErrorKey] = error;
         if (params) {
             result[RNBranchLinkOpenedNotificationParamsKey] = params;
-            BOOL clickedBranchLink = [params[@"+clicked_branch_link"] boolValue];
-
+            BOOL clickedBranchLink = params[@"+clicked_branch_link"];
+            
             if (clickedBranchLink) {
                 BranchUniversalObject *branchUniversalObject = [BranchUniversalObject objectWithDictionary:params];
                 if (branchUniversalObject) result[RNBranchLinkOpenedNotificationBranchUniversalObjectKey] = branchUniversalObject;
-
+                
                 BranchLinkProperties *linkProperties = [BranchLinkProperties getBranchLinkPropertiesFromDictionary:params];
                 if (linkProperties) result[RNBranchLinkOpenedNotificationLinkPropertiesKey] = linkProperties;
-
+                
                 if (params[@"~referring_link"]) {
                     result[RNBranchLinkOpenedNotificationUriKey] = [NSURL URLWithString:params[@"~referring_link"]];
                 }
@@ -200,7 +193,7 @@ RCT_EXPORT_MODULE();
                 result[RNBranchLinkOpenedNotificationUriKey] = [NSURL URLWithString:params[@"+non_branch_link"]];
             }
         }
-
+        
         [[NSNotificationCenter defaultCenter] postNotificationName:RNBranchLinkOpenedNotification object:nil userInfo:result];
     }];
 }
@@ -321,7 +314,7 @@ RCT_EXPORT_METHOD(initializeBranch:(NSString *)key
     NSError *error = [NSError errorWithDomain:RNBranchErrorDomain
                                          code:-1
                                      userInfo:nil];
-
+    
     reject(@"RNBranch::Error::Unsupported", @"Initializing the Branch SDK from JS will be supported in a future release.", error);
 
     /*
@@ -349,14 +342,10 @@ RCT_EXPORT_METHOD(
 
 #pragma mark getLatestReferringParams
 RCT_EXPORT_METHOD(
-                  getLatestReferringParams:(NSNumber* __nonnull)synchronous
-                  resolver:(RCTPromiseResolveBlock)resolve
+                  getLatestReferringParams:(RCTPromiseResolveBlock)resolve
                   rejecter:(__unused RCTPromiseRejectBlock)reject
                   ) {
-    if (synchronous.boolValue)
-        resolve([self.class.branch getLatestReferringParamsSynchronous]);
-    else
-        resolve([self.class.branch getLatestReferringParams]);
+    resolve([self.class.branch getLatestReferringParams]);
 }
 
 #pragma mark getFirstReferringParams
